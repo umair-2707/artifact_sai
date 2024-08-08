@@ -7,13 +7,12 @@ jobs:
       greeting: ${{ steps.hello.outputs.greeting }}
     steps:
       - name: Generate Greeting
-        id: Hello
+        id: hello
         run: echo "::set-output name=greeting::Hello, Umair!"
-job2:
-  runs-on: ubuntu-latest
-  needs: job1
-  steps: 
-    - name: use greeting from job1
-      run: echo "The greeting from job1 is ${{needs.job1.outputs.greeting}}"
 
-
+  job2:
+    runs-on: ubuntu-latest
+    needs: job1
+    steps:
+      - name: Use greeting from job1
+        run: echo "The greeting from job1 is ${{ needs.job1.outputs.greeting }}"
