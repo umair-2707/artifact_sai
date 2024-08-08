@@ -1,88 +1,82 @@
----
+name: CI
+
 on: [push, pull_request]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-          
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with: 
-          path: |
-            ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run tests
-        run: |
-          mkdir -p test-results
-          pytest --junitxml=test-results/results.xml
-          
-      - name: Add timestamp
-        run: |
-          echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results-${{ env.TIMESTAMP }}
-          path: test-results/
-          
-      # Uncomment the following if you want to upload test results without timestamp
-      # - name: Upload test results (without timestamp)
-      #   uses: actions/upload-artifact@v3
-      #   with: 
-      #     name: test-results
-      #     path: test-results/
-
-      - name: Build project
-        run: |
-          mkdir -p build
-          echo "This is a build output" > build/output.txt
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: build/
-
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run tests
+      run: |
+        mkdir -p test-results
+        pytest --junitxml=test-results/results.xml
+        
+    - name: Add timestamp
+      run: |
+        echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ env.TIMESTAMP }}
+        path: test-results/
+        
+    - name: Build project
+      run: |
+        mkdir -p build
+        echo "This is a build output" > build/output.txt
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: build/
+        
   download:
     runs-on: ubuntu-latest
     needs: build
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download test results artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: test-results-${{ env.TIMESTAMP }}
-          path: downloaded-test-results/
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with: 
-          name: build-artifacts
-          path: downloaded-build-artifacts/
-
-      - name: Display downloaded test results
-        run: cat downloaded-test-results/results.xml
-
-      - name: Display downloaded build artifacts
-        run: cat downloaded-build-artifacts/output.txt
-...
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download test results artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: test-results-${{ needs.build.outputs.TIMESTAMP }}
+        path: downloaded-test-results/
+        
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+        path: downloaded-build-artifacts/
+        
+    - name: Display downloaded test results
+      run: cat downloaded-test-results/results.xml
+      
+    - name: Display downloaded build artifacts
+      run: cat downloaded-build-artifacts/output.txt
