@@ -4,15 +4,16 @@ jobs:
   job1:
     runs-on: ubuntu-latest
     outputs:
-      greeting: ${{steps.hello.outputs.greeting}}
+      greeting: ${{ steps.hello.outputs.greeting }}
     steps:
       - name: Generate Greeting
-        id: hello
+        id: Hello
         run: echo "::set-output name=greeting::Hello, Umair!"
 job2:
-
   runs-on: ubuntu-latest
   needs: job1
   steps: 
-  - name: use greeting from job1
-    run: echo "The greeting from job1 is ${{needs.job1.outputs.greeting}}"
+    - name: use greeting from job1
+      run: echo "The greeting from job1 is ${{needs.job1.outputs.greeting}}"
+
+
