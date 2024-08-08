@@ -34,11 +34,27 @@ jobs:
           mkdir -p test-results
           pytest --junitxml=test-results/results.xml
 
+      - name: add timestamp
+
+        run: |
+
+          echo "TIMESTAMP=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_ENV
+
       - name: Upload test results
+
         uses: actions/upload-artifact@v3
+
         with:
-          name: test-results
+
+          name: test-results_${{ env.TIMESTAMP }}
+
           path: test-results/
+ 
+      # - name: Upload test results
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: test-results
+      #     path: test-results/
 
       - name: Build project
         run: |
